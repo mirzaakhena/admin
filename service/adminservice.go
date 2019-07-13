@@ -15,6 +15,8 @@ type IAdminService interface {
 	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.UserSpace, uint)
 	CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error)
 
+	IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool
+
 	GenerateInvitationAccount(sc model.ServiceContext, req model.GenerateInvitationAccountRequest) (*model.GenerateInvitationAccountResponse, error)
 	UpdateAccountStatus(sc model.ServiceContext, req model.UpdateStatusRequest) (*model.UpdateStatusResponse, error)
 	RemoveAccount(sc model.ServiceContext, req model.RemoveAccountRequest) (*model.RemoveAccountResponse, error)
@@ -79,6 +81,17 @@ func (o *AdminService) CreateSpace(sc model.ServiceContext, req model.CreateSpac
 	response := model.CreateSpaceResponse{}
 
 	return &response, nil
+}
+
+// IsAdmin is
+func (o *AdminService) IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool {
+
+	userID, _ := o.getUserIDFromServiceContext(sc)
+
+	tx := o.Trx.GetDB(false)
+	us := o.UserSpace.GetOne(tx, req.SpaceID, userID)
+
+	return us.ID != "" && us.Type == "ADMIN" && us.Status == "ACTIVE"
 }
 
 // GenerateInvitationAccount is

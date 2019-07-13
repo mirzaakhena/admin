@@ -63,6 +63,11 @@ type CreateSpaceRequest struct {
 	SpacePlanID string `json:"spacePlanID"` //
 }
 
+// IsAdminRequest is
+type IsAdminRequest struct {
+	SpaceID string `json:"spaceID"` //
+}
+
 // GetBasicUserInfoRequest is
 type GetBasicUserInfoRequest struct{}
 

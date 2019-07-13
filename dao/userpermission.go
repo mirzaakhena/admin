@@ -19,6 +19,7 @@ type IUserPermissionDao interface {
 type UserPermissionDao struct {
 }
 
+// GetUserPermission is
 func (u *UserPermissionDao) GetUserPermission(dc model.DaoContext, userID, spaceID, code string) *model.UserPermission {
 
 	var obj model.UserPermission
@@ -28,25 +29,29 @@ func (u *UserPermissionDao) GetUserPermission(dc model.DaoContext, userID, space
 	}
 	return &obj
 
-	return nil
 }
 
+// Create is
 func (u *UserPermissionDao) Create(dc model.DaoContext, bu model.UserPermission) error {
 	return nil
 }
 
+// GetOne is
 func (u *UserPermissionDao) GetOne(dc model.DaoContext, spaceID, userID string) *model.UserPermission {
 	return nil
 }
 
+// GetAll is
 func (u *UserPermissionDao) GetAll(dc model.DaoContext, req model.GetAllBasicRequest) ([]model.UserPermission, uint64) {
 	return nil, 0
 }
 
+// Delete is
 func (u *UserPermissionDao) Delete(dc model.DaoContext, ID string) error {
 	return nil
 }
 
+// Update is
 func (u *UserPermissionDao) Update(dc model.DaoContext, ID string, obj *model.UserPermission) error {
 	return nil
 }
