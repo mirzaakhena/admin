@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mirzaakhena/admin/model"
@@ -12,6 +14,7 @@ import (
 type IAdminService interface {
 	IUserService
 
+	GetOneSpace(sc model.ServiceContext) *model.Space
 	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint)
 	CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error)
 
@@ -37,6 +40,12 @@ type AdminService struct {
 	UserService
 }
 
+// GetOneSpace is
+func (o *AdminService) GetOneSpace(sc model.ServiceContext) *model.Space {
+	spaceID := sc["spaceId"].(string)
+	return o.Space.GetOne(o.Trx.GetDB(false), spaceID)
+}
+
 // GetAllUserSpace is
 func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint) {
 	var ss []model.Space
@@ -50,21 +59,28 @@ func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAll
 // CreateSpace is
 func (o *AdminService) CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error) {
 
+	name := strings.TrimSpace(req.Name)
+	description := strings.TrimSpace(req.Description)
+
+	if name == "" {
+		return nil, fmt.Errorf("space name must not empty")
+	}
+
 	userID, logInfo := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(true)
 
-	if o.Space.IsExistName(tx, req.Name, userID) {
-		log.GetLog().Error(logInfo, "space with name %s is exist", req.Name)
+	if o.Space.IsExistName(tx, name, userID) {
+		log.GetLog().Error(logInfo, "space with name %s is exist", name)
 		o.Trx.RollbackTransaction(tx)
-		return nil, utils.PrintError(model.ConstErrorUnExistingEmailAddress, "space with name %s is exist. ", req.Name)
+		return nil, utils.PrintError(model.ConstErrorUnExistingEmailAddress, "space with name %s is exist. ", name)
 	}
 
 	var ws model.Space
 	{
 		ws.ID = utils.GenID()
-		ws.Name = req.Name
-		ws.Description = req.Description
+		ws.Name = name
+		ws.Description = description
 		ws.MaxUser = 5
 		ws.TotalCurrentUser = 1
 		ws.Expired = time.Now().Add(time.Hour * 24 * 100000)

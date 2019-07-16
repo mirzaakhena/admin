@@ -40,7 +40,9 @@ func (s *SpaceDao) Create(dc model.DaoContext, bu model.Space) error {
 
 // GetOne is
 func (s *SpaceDao) GetOne(dc model.DaoContext, ID string) *model.Space {
-	return nil
+	var space model.Space
+	dc.(*gorm.DB).First(&space, "id = ?", ID)
+	return &space
 }
 
 // GetAll is
