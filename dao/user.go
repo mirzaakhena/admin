@@ -22,6 +22,11 @@ type IUserDao interface {
 type UserDao struct {
 }
 
+// NewUserDao is
+func NewUserDao() *UserDao {
+	return &UserDao{}
+}
+
 // GetAll is
 func (b *UserDao) GetAll(dc model.DaoContext, req model.GetAllBasicRequest) ([]model.User, uint) {
 

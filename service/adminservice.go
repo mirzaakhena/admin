@@ -12,24 +12,24 @@ import (
 type IAdminService interface {
 	IUserService
 
-	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.UserSpace, uint)
+	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint)
 	CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error)
 
-	IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool
+	// IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool
 
-	GenerateInvitationAccount(sc model.ServiceContext, req model.GenerateInvitationAccountRequest) (*model.GenerateInvitationAccountResponse, error)
-	UpdateAccountStatus(sc model.ServiceContext, req model.UpdateStatusRequest) (*model.UpdateStatusResponse, error)
-	RemoveAccount(sc model.ServiceContext, req model.RemoveAccountRequest) (*model.RemoveAccountResponse, error)
+	// GenerateInvitationAccount(sc model.ServiceContext, req model.GenerateInvitationAccountRequest) (*model.GenerateInvitationAccountResponse, error)
+	// UpdateAccountStatus(sc model.ServiceContext, req model.UpdateStatusRequest) (*model.UpdateStatusResponse, error)
+	// RemoveAccount(sc model.ServiceContext, req model.RemoveAccountRequest) (*model.RemoveAccountResponse, error)
 
-	RemoveWaitingAccount(sc model.ServiceContext, req model.RemoveWaitingAccountRequest) (*model.RemoveWaitingAccountResponse, error)
+	// RemoveWaitingAccount(sc model.ServiceContext, req model.RemoveWaitingAccountRequest) (*model.RemoveWaitingAccountResponse, error)
 
-	GetAllUserRolePermission(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.GetAllUserRolePermissionResponse, uint)
-	CreateUserRolePermission(sc model.ServiceContext, req model.CreateUserRolePermissionRequest) (*model.CreateUserRolePermissionResponse, error)
-	UpdateUserRolePermission(sc model.ServiceContext, req model.UpdateUserRolePermissionRequest) (*model.UpdateUserRolePermissionResponse, error)
-	DeleteUserRolePermission(sc model.ServiceContext, req model.DeleteUserRolePermissionRequest) (*model.DeleteUserRolePermissionResponse, error)
+	// GetAllUserRolePermission(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.GetAllUserRolePermissionResponse, uint)
+	// CreateUserRolePermission(sc model.ServiceContext, req model.CreateUserRolePermissionRequest) (*model.CreateUserRolePermissionResponse, error)
+	// UpdateUserRolePermission(sc model.ServiceContext, req model.UpdateUserRolePermissionRequest) (*model.UpdateUserRolePermissionResponse, error)
+	// DeleteUserRolePermission(sc model.ServiceContext, req model.DeleteUserRolePermissionRequest) (*model.DeleteUserRolePermissionResponse, error)
 
-	GetAllAccountUserRole(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.GetAllAccountUserRoleResponse, uint)
-	UpdateAccountUserRole(sc model.ServiceContext, req model.UpdateAccountUserRoleRequest) (*model.UpdateAccountUserRoleResponse, error)
+	// GetAllAccountUserRole(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.GetAllAccountUserRoleResponse, uint)
+	// UpdateAccountUserRole(sc model.ServiceContext, req model.UpdateAccountUserRoleRequest) (*model.UpdateAccountUserRoleResponse, error)
 }
 
 // AdminService is
@@ -38,18 +38,23 @@ type AdminService struct {
 }
 
 // GetAllUserSpace is
-func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.UserSpace, uint) {
-	return o.UserSpace.GetAll(o.Trx.GetDB(false), req)
+func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint) {
+	var ss []model.Space
+	us, count := o.UserSpace.GetAll(o.Trx.GetDB(false), req)
+	for _, s := range us {
+		ss = append(ss, *s.Space)
+	}
+	return ss, count
 }
 
 // CreateSpace is
 func (o *AdminService) CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error) {
 
-	userID, logInfo := o.getUserIDFromServiceContext(sc)
+	userID, logInfo := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(true)
 
-	if !o.Space.IsUniqueNamePerUserID(tx, req.Name, userID) {
+	if o.Space.IsExistName(tx, req.Name, userID) {
 		log.GetLog().Error(logInfo, "space with name %s is exist", req.Name)
 		o.Trx.RollbackTransaction(tx)
 		return nil, utils.PrintError(model.ConstErrorUnExistingEmailAddress, "space with name %s is exist. ", req.Name)
@@ -86,7 +91,7 @@ func (o *AdminService) CreateSpace(sc model.ServiceContext, req model.CreateSpac
 // IsAdmin is
 func (o *AdminService) IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool {
 
-	userID, _ := o.getUserIDFromServiceContext(sc)
+	userID, _ := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(false)
 	us := o.UserSpace.GetOne(tx, req.SpaceID, userID)
@@ -111,13 +116,15 @@ func (o *AdminService) GenerateInvitationAccount(sc model.ServiceContext, req mo
 // UpdateAccountStatus is
 func (o *AdminService) UpdateAccountStatus(sc model.ServiceContext, req model.UpdateStatusRequest) (*model.UpdateStatusResponse, error) {
 
-	// userID, logInfo := o.getUserIDFromServiceContext(sc)
+	// userID, logInfo := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(true)
 
 	wsa := o.UserSpace.GetOne(tx, req.SpaceID, req.UserID)
 	wsa.Status = req.Status
 	o.UserSpace.Update(tx, wsa.ID, wsa)
+
+	o.Trx.CommitTransaction(tx)
 
 	response := model.UpdateStatusResponse{}
 
@@ -130,6 +137,8 @@ func (o *AdminService) RemoveAccount(sc model.ServiceContext, req model.RemoveAc
 
 	wsa := o.UserSpace.GetOne(tx, req.SpaceID, req.UserID)
 	o.UserSpace.Delete(tx, wsa.ID)
+
+	o.Trx.CommitTransaction(tx)
 
 	response := model.RemoveAccountResponse{}
 

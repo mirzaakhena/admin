@@ -17,11 +17,11 @@ type BaseModel struct {
 // Space is masterdata
 type Space struct {
 	BaseModel
-	Name             string    ``         //
-	Description      string    ``         //
-	Expired          time.Time `json:"-"` //
-	MaxUser          int       `json:"-"` //
-	TotalCurrentUser int       `json:"-"` //
+	Name             string    `json:"name"`        //
+	Description      string    `json:"description"` //
+	Expired          time.Time `json:"-"`           //
+	MaxUser          int       `json:"-"`           //
+	TotalCurrentUser int       `json:"-"`           //
 }
 
 // SpaceRole is Role that exist in the space
@@ -64,6 +64,7 @@ type User struct {
 // UserSpace is
 type UserSpace struct {
 	BaseModel
+	Space   *Space `json:"-"` //
 	SpaceID string `json:"-"` //
 	UserID  string `json:"-"` //
 	Type    string `json:"-"` // ADMIN | USER

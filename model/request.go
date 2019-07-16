@@ -60,7 +60,6 @@ type UpdatePasswordRequest struct {
 type CreateSpaceRequest struct {
 	Name        string `json:"name"`        //
 	Description string `json:"description"` //
-	SpacePlanID string `json:"spacePlanID"` //
 }
 
 // IsAdminRequest is

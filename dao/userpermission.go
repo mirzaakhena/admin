@@ -19,6 +19,11 @@ type IUserPermissionDao interface {
 type UserPermissionDao struct {
 }
 
+// NewUserPermissionDao is
+func NewUserPermissionDao() *UserPermissionDao {
+	return &UserPermissionDao{}
+}
+
 // GetUserPermission is
 func (u *UserPermissionDao) GetUserPermission(dc model.DaoContext, userID, spaceID, code string) *model.UserPermission {
 

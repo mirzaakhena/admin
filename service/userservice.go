@@ -16,6 +16,7 @@ type IUserService interface {
 	UpdatePassword(sc model.ServiceContext, req model.UpdatePasswordRequest) (*model.UpdatePasswordResponse, error)
 	GetAllPermission(sc model.ServiceContext, req model.GetAllBasicRequest) (*model.GetAllPermissionResponse, uint64)
 	CreateAdminUserIfNotExist(sc model.ServiceContext)
+	ExtractServiceContext(sc model.ServiceContext) (string, interface{})
 }
 
 // UserService is
@@ -51,7 +52,7 @@ func (o *UserService) CreateAdminUserIfNotExist(sc model.ServiceContext) {
 
 // IsAccessable is
 func (o *UserService) IsAccessable(sc model.ServiceContext, req model.IsAccessableRequest) bool {
-	userID, _ := o.getUserIDFromServiceContext(sc)
+	userID, _ := o.ExtractServiceContext(sc)
 
 	up := o.UserPermission.GetUserPermission(o.Trx.GetDB(false), userID, req.SpaceID, req.MethodEndpoint)
 
@@ -61,7 +62,7 @@ func (o *UserService) IsAccessable(sc model.ServiceContext, req model.IsAccessab
 // GetBasicUserInfo is
 func (o *UserService) GetBasicUserInfo(sc model.ServiceContext, req model.GetBasicUserInfoRequest) *model.GetBasicUserInfoResponse {
 
-	userID, _ := o.getUserIDFromServiceContext(sc)
+	userID, _ := o.ExtractServiceContext(sc)
 
 	bu := o.User.GetOneByID(o.Trx.GetDB(false), userID)
 
@@ -74,7 +75,7 @@ func (o *UserService) GetBasicUserInfo(sc model.ServiceContext, req model.GetBas
 
 // UpdateBasicUserInfo is
 func (o *UserService) UpdateBasicUserInfo(sc model.ServiceContext, req model.UpdateBasicUserInfoRequest) (*model.UpdateBasicUserInfoResponse, error) {
-	userID, _ := o.getUserIDFromServiceContext(sc)
+	userID, _ := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(true)
 
@@ -96,7 +97,7 @@ func (o *UserService) UpdateBasicUserInfo(sc model.ServiceContext, req model.Upd
 // UpdatePassword is
 func (o *UserService) UpdatePassword(sc model.ServiceContext, req model.UpdatePasswordRequest) (*model.UpdatePasswordResponse, error) {
 
-	userID, logInfo := o.getUserIDFromServiceContext(sc)
+	userID, logInfo := o.ExtractServiceContext(sc)
 
 	tx := o.Trx.GetDB(true)
 
@@ -120,12 +121,12 @@ func (o *UserService) UpdatePassword(sc model.ServiceContext, req model.UpdatePa
 // GetAllPermission is
 func (o *UserService) GetAllPermission(sc model.ServiceContext, req model.GetAllBasicRequest) (*model.GetAllPermissionResponse, uint64) {
 
-	// userID, logInfo := o.getUserIDFromServiceContext(sc)
+	// userID, logInfo := o.ExtractServiceContext(sc)
 
 	return nil, 0
 }
 
-func (o *UserService) getUserIDFromServiceContext(sc model.ServiceContext) (string, interface{}) {
+func (o *UserService) ExtractServiceContext(sc model.ServiceContext) (string, interface{}) {
 	logInfo := sc["logInfo"]
 	userIDInterface, ok := sc["user.id"]
 	if !ok {
