@@ -72,25 +72,34 @@ func (o *GuestService) Register(sc model.ServiceContext, req model.RegisterReque
 	us.Name = req.Name
 	us.Email = req.Email
 	us.Password = hashedPassword
-	us.Status = "WAITING"
-	us.LoginToken = registerToken
+
+	if bypassActivation {
+		us.Status = "ACTIVE"
+		us.LoginToken = ""
+	} else {
+		us.Status = "WAITING"
+		us.LoginToken = registerToken
+	}
 
 	o.User.Create(tx, &us)
 
-	host, ok := sc["host"]
-	if !ok {
-		log.GetLog().Panic(logInfo, "host not setup yet")
-	}
+	if !bypassActivation {
 
-	protocol := o.Config.GetString("server.protocol", "http")
-	path := o.Config.GetString("link.activation", "/activate")
-	activationLink := fmt.Sprintf("%s://%s%s?token=%s", protocol, host, path, registerToken)
-	message := fmt.Sprintf("please click this %s to activate the account", activationLink)
+		host, ok := sc["host"]
+		if !ok {
+			log.GetLog().Panic(logInfo, "host not setup yet")
+		}
 
-	if err := o.Email.Send(o.Config.GetString("email.from", "app@mail.com"), req.Email, "Activation Account", message); err != nil {
-		log.GetLog().Error(logInfo, "problem with sending email to %v", us.Email)
-		o.Trx.RollbackTransaction(tx)
-		return nil, utils.PrintError(model.ConstErrorWhenSendingEmail, "Server problem in sending email. %s", err.Error())
+		protocol := o.Config.GetString("server.protocol", "http")
+		path := o.Config.GetString("link.activation", "/activate")
+		activationLink := fmt.Sprintf("%s://%s%s?token=%s", protocol, host, path, registerToken)
+		message := fmt.Sprintf("please click this %s to activate the account", activationLink)
+
+		if err := o.Email.Send(o.Config.GetString("email.from", "app@mail.com"), req.Email, "Activation Account", message); err != nil {
+			log.GetLog().Error(logInfo, "problem with sending email to %v", us.Email)
+			o.Trx.RollbackTransaction(tx)
+			return nil, utils.PrintError(model.ConstErrorWhenSendingEmail, "Server problem in sending email. %s", err.Error())
+		}
 	}
 
 	o.Trx.CommitTransaction(tx)
