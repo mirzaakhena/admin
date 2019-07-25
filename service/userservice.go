@@ -126,9 +126,10 @@ func (o *UserService) GetAllPermission(sc model.ServiceContext, req model.GetAll
 	return nil, 0
 }
 
+// ExtractServiceContext is
 func (o *UserService) ExtractServiceContext(sc model.ServiceContext) (string, interface{}) {
 	logInfo := sc["logInfo"]
-	userIDInterface, ok := sc["user.id"]
+	userIDInterface, ok := sc["userId"]
 	if !ok {
 		log.GetLog().Panic(logInfo, "user.id not setup yet")
 	}

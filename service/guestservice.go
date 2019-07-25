@@ -17,7 +17,7 @@ import (
 
 // IGuestService is
 type IGuestService interface {
-	Register(sc model.ServiceContext, req model.RegisterRequest) (*model.RegisterResponse, error)
+	Register(sc model.ServiceContext, req model.RegisterRequest, bypassActivation bool) (*model.RegisterResponse, error)
 	Activate(sc model.ServiceContext, req model.ActivateRequest) (*model.ActivateResponse, error)
 	Login(sc model.ServiceContext, req model.LoginRequest) (*model.LoginResponse, error)
 	ForgotPasswordInit(sc model.ServiceContext, req model.ForgotPasswordInitRequest) (*model.ForgotPasswordInitResponse, error)
@@ -35,7 +35,7 @@ type GuestService struct {
 }
 
 // Register is
-func (o *GuestService) Register(sc model.ServiceContext, req model.RegisterRequest) (*model.RegisterResponse, error) {
+func (o *GuestService) Register(sc model.ServiceContext, req model.RegisterRequest, bypassActivation bool) (*model.RegisterResponse, error) {
 
 	logInfo := sc["logInfo"]
 

@@ -39,7 +39,7 @@ func (m *MyApi) Register(c *gin.Context) {
 
 	log.GetLog().Info(logInfo, "Request %v", req)
 
-	res, err := m.GuestService.Register(sc, req)
+	res, err := m.GuestService.Register(sc, req, false)
 
 	if err != nil {
 		log.GetLog().Error(logInfo, "%v", err.Error())
