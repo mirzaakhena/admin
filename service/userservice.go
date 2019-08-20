@@ -11,7 +11,7 @@ import (
 type IUserService interface {
 	IGuestService
 	IsAccessable(sc model.ServiceContext, req model.IsAccessableRequest) bool
-	GetBasicUserInfo(sc model.ServiceContext, req model.GetBasicUserInfoRequest) *model.GetBasicUserInfoResponse
+	GetBasicUserInfo(sc model.ServiceContext) *model.GetBasicUserInfoResponse
 	UpdateBasicUserInfo(sc model.ServiceContext, req model.UpdateBasicUserInfoRequest) (*model.UpdateBasicUserInfoResponse, error)
 	UpdatePassword(sc model.ServiceContext, req model.UpdatePasswordRequest) (*model.UpdatePasswordResponse, error)
 	GetAllPermission(sc model.ServiceContext, req model.GetAllBasicRequest) (*model.GetAllPermissionResponse, uint64)
@@ -60,7 +60,7 @@ func (o *UserService) IsAccessable(sc model.ServiceContext, req model.IsAccessab
 }
 
 // GetBasicUserInfo is
-func (o *UserService) GetBasicUserInfo(sc model.ServiceContext, req model.GetBasicUserInfoRequest) *model.GetBasicUserInfoResponse {
+func (o *UserService) GetBasicUserInfo(sc model.ServiceContext) *model.GetBasicUserInfoResponse {
 
 	userID, _ := o.ExtractServiceContext(sc)
 

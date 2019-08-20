@@ -37,6 +37,12 @@ type UpdatePasswordResponse struct{}
 // CreateSpaceResponse is
 type CreateSpaceResponse struct{}
 
+// GetAllSpaceResponse is
+type GetAllSpaceResponse struct {
+	TotalCount uint    `json:"totalCount"`
+	Spaces     []Space `json:"spaces"`
+}
+
 // GetAllPermissionResponse is
 type GetAllPermissionResponse struct{}
 

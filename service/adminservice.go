@@ -15,7 +15,7 @@ type IAdminService interface {
 	IUserService
 
 	GetOneSpace(sc model.ServiceContext) *model.Space
-	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint)
+	GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) *model.GetAllSpaceResponse
 	CreateSpace(sc model.ServiceContext, req model.CreateSpaceRequest) (*model.CreateSpaceResponse, error)
 
 	// IsAdmin(sc model.ServiceContext, req model.IsAdminRequest) bool
@@ -47,13 +47,17 @@ func (o *AdminService) GetOneSpace(sc model.ServiceContext) *model.Space {
 }
 
 // GetAllUserSpace is
-func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) ([]model.Space, uint) {
+func (o *AdminService) GetAllUserSpace(sc model.ServiceContext, req model.GetAllBasicRequest) *model.GetAllSpaceResponse {
 	var ss []model.Space
 	us, count := o.UserSpace.GetAll(o.Trx.GetDB(false), req)
 	for _, s := range us {
 		ss = append(ss, *s.Space)
 	}
-	return ss, count
+	result := model.GetAllSpaceResponse{
+		TotalCount: count,
+		Spaces:     ss,
+	}
+	return &result
 }
 
 // CreateSpace is
